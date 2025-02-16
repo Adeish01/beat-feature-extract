@@ -3,24 +3,13 @@ import librosa
 import streamlit as st
 from typing import Dict, Any
 import numpy as np
-import yt_dlp as youtube_dl
 from key_analyzer import estimate_key
 from tempo_analyzer import estimate_tempo
 from instrument_analyzer import detect_instruments
 from mood_analyzer import analyze_mood 
-from llm_analyzers import get_openai_analysis_llm, get_perplexity_analysis_llm
-import json
+from llm_analyzers import get_perplexity_analysis_llm
 
 
-
-ydl_opts = {
-    'format': 'bestaudio/best',
-    'postprocessors': [{
-        'key': 'FFmpegExtractAudio',
-        'preferredcodec': 'wav',
-        'preferredquality': '192',
-    }],
-}
 
 def get_standardized_output() -> Dict[str, Any]:
     """
@@ -44,14 +33,14 @@ def process_audio_file(file_content):
     audio_data, sample_rate = librosa.load(audio_bytes)
     return audio_data, sample_rate
 
-def download_youtube_audio(url: str):
-    """Download audio from YouTube URL using youtube-dl"""
-    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-        info = ydl.extract_info(url, download=True)  # Changed to download=True
-        filename = ydl.prepare_filename(info)
-        # Load the downloaded file directly
-        audio_data, sample_rate = librosa.load(filename, sr=None)
-        return audio_data, sample_rate, info['title']
+# def download_youtube_audio(url: str):
+#     """Download audio from YouTube URL using youtube-dl"""
+#     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+#         info = ydl.extract_info(url, download=True)  # Changed to download=True
+#         filename = ydl.prepare_filename(info)
+#         # Load the downloaded file directly
+#         audio_data, sample_rate = librosa.load(filename, sr=None)
+#         return audio_data, sample_rate, info['title']
 
 def analyze_audio_data(audio_data: np.ndarray, sample_rate: int) -> Dict[str, Any]:
     """
@@ -109,16 +98,16 @@ def analyze_audio_file(uploaded_file) -> Dict[str, Any]:
         st.error(f"Error processing audio file: {str(e)}")
         return get_standardized_output()
 
-def analyze_url_audio(url: str) -> Dict[str, Any]:
-    """
-    Function to analyze audio from URL
-    """
-    try:
-        audio_data, sample_rate, _ = download_youtube_audio(url)
-        return analyze_audio_data(audio_data, sample_rate)
-    except Exception as e:
-        st.error(f"Error processing URL audio: {str(e)}")
-        return get_standardized_output()
+# def analyze_url_audio(url: str) -> Dict[str, Any]:
+#     """
+#     Function to analyze audio from URL
+#     """
+#     try:
+#         audio_data, sample_rate, _ = download_youtube_audio(url)
+#         return analyze_audio_data(audio_data, sample_rate)
+#     except Exception as e:
+#         st.error(f"Error processing URL audio: {str(e)}")
+#         return get_standardized_output()
 
 def analyze_system_recording() -> Dict[str, Any]:
     """
